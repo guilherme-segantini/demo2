@@ -1,0 +1,12 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <VBox class="sapUiTinyMarginBottom">
+        <ObjectStatus
+            title="{tool_name}"
+            text="{technical_insight}"
+            state="Warning"
+            icon="sap-icon://alert" />
+        <Text text="Confidence: {confidence_score}%" class="sapUiTinyMarginTop" />
+    </VBox>
+</core:FragmentDefinition>

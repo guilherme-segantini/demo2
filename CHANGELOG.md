@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-02-16
+
+### Scaffolding Complete ✅
+
+This release verifies that the project foundation is complete and working. All files are in place, dependencies install successfully, and both frontend and backend start without errors.
+
 ### Added
+- **XML View Fragments** - Created SignalItem.fragment.xml and NoiseItem.fragment.xml for displaying radar trends in the UI
 - **Voice AI prompt template** (`prompts/voice_ai_prompt.md`) - Discovery and classification prompt with criteria for latency benchmarks, VAD implementation, streaming architecture
 - **Agent Orchestration prompt template** (`prompts/agent_orchestration_prompt.md`) - Discovery and classification prompt with criteria for state persistence, tool chaining, human-in-the-loop patterns
 - **Durable Runtime prompt template** (`prompts/durable_runtime_prompt.md`) - Discovery and classification prompt with criteria for durability guarantees, cold-start benchmarks, checkpoint/recovery
