@@ -233,12 +233,34 @@ Maintain `CHANGELOG.md` as a **first-class artifact**.
 
 ---
 
+## UI Testing with Playwright MCP
+
+**All UI testing MUST use Playwright MCP (Model Context Protocol).**
+
+When testing frontend functionality:
+1. Use Playwright MCP to automate browser interactions
+2. Take screenshots to verify UI rendering
+3. Test user flows end-to-end (navigation, forms, data display)
+4. Verify responsive behavior if applicable
+
+Playwright MCP commands are available through the MCP tools. Use them for:
+- Opening pages and navigating
+- Clicking buttons and links
+- Filling forms
+- Taking screenshots
+- Asserting element visibility and content
+
+**Do not rely solely on manual testing.** Playwright MCP provides automated, repeatable UI verification.
+
+---
+
 ## Verification Checklist
 
 Before marking work complete:
 - [ ] App runs without console errors
 - [ ] `npm run lint` passes with 0 errors
 - [ ] Backend `pytest` passes
+- [ ] **UI tested with Playwright MCP** (screenshots taken)
 - [ ] Navigation works correctly
 - [ ] i18n used for all text
 - [ ] No hardcoded URLs or secrets
