@@ -27,21 +27,65 @@ gh issue view 15
 
 **Tech Stack:** SAPUI5 1.120+, JavaScript (ES6+), FastAPI, SQLite, LiteLLM
 
+---
+
+### 🚫 MANDATORY: Use `uv` for Python (NOT venv/pip)
+
+**DO NOT use `python -m venv`, `pip install`, or `virtualenv`.**
+
+This project uses **uv** - a fast, Rust-based Python package manager.
+
+---
+
+### First-Time Setup
+
 ```bash
-# Frontend
-npm install        # Install dependencies
+# 1. Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 2. Frontend setup
+npm install
+
+# 3. Backend setup (using uv - NOT pip)
+cd backend
+uv venv                              # Creates .venv directory
+source .venv/bin/activate            # Activate environment
+uv pip install -r requirements.txt   # Install dependencies (10-100x faster than pip)
+```
+
+### Running the Application
+
+```bash
+# Frontend (from project root)
 npm start          # Start dev server (localhost:8080)
 npm run build      # Build for production
 npm run lint       # Run UI5 linter
 
-# Backend
+# Backend (from backend/)
 cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+source .venv/bin/activate
 uvicorn app.main:app --reload  # Start API (localhost:8000)
 pytest             # Run tests
 ```
+
+### Why uv?
+
+- **10-100x faster** than pip
+- **Drop-in replacement** - same commands, just prefix with `uv`
+- **Deterministic installs** - better reproducibility
+- **Single tool** - replaces pip, pip-tools, virtualenv
+
+### uv Quick Reference
+
+```bash
+uv venv                          # Create virtual environment (.venv)
+uv pip install <package>         # Install a package
+uv pip install -r requirements.txt  # Install from requirements
+uv pip list                      # List installed packages
+uv pip freeze > requirements.txt # Export dependencies
+```
+
+---
 
 ## For litellm setup with generative AI Hub
 
@@ -184,9 +228,9 @@ npm run lint                    # MUST show 0 errors
 npm start &                     # Start dev server
 # Use Playwright MCP to test UI (see below)
 
-# Backend tests (run from backend/)
+# Backend tests (run from backend/) - USE UV, NOT PIP
 cd backend
-source venv/bin/activate
+source .venv/bin/activate       # Note: .venv (not venv)
 pytest                          # MUST show all tests pass
 pytest --cov=app                # Check coverage (optional but recommended)
 ```
@@ -265,6 +309,7 @@ git rebase origin/main
 3. **NO STARTING NEXT ISSUE** - Until current PR is merged to main
 4. **ONE ISSUE AT A TIME** - Never work on multiple issues simultaneously
 5. **ALWAYS CREATE A PR** - Every completed task needs a PR, no direct pushes to main
+6. **USE UV ONLY** - Never use `pip`, `venv`, or `virtualenv`. Always use `uv venv` and `uv pip install`
 
 ---
 
