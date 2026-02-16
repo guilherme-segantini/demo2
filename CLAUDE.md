@@ -157,24 +157,114 @@ When starting a new session:
 
 Complete the full cycle for one issue before starting another. Do not work on multiple issues simultaneously.
 
-### Complete Workflow (must follow in order)
+---
 
-1. **Code** - Implement the changes for the issue
-2. **Test** - Run verification checklist:
-   - [ ] App runs without console errors (`npm start`)
-   - [ ] `npm run lint` passes with 0 errors
-   - [ ] Backend tests pass (`cd backend && pytest`)
-   - [ ] Manual testing of the feature/fix
-   - [ ] i18n used for all text
-   - [ ] No hardcoded URLs or secrets
-3. **Document** - Update CHANGELOG.md with your changes
-4. **Commit** - `git commit -m "feat: description. Closes #<number>"`
-5. **Push** - `git push origin <branch-name>`
-6. **PR** - `gh pr create --base main --title "Description" --body "Closes #<number>"`
-7. **Merge** - `gh pr merge <number> --squash`
-8. **Next** - Only now pick the next issue
+## ⚠️ MANDATORY: Complete Task Workflow
 
-**Do not skip testing.** If tests fail, fix them before committing.
+**Every task MUST follow this exact sequence. No exceptions. No skipping steps.**
+
+### Step 1: START - Claim the Issue
+```bash
+gh issue edit <number> --add-label "in-progress"
+```
+
+### Step 2: CODE - Implement the Changes
+- Write the code for the issue
+- Follow all code rules (i18n, no globals, async loading, etc.)
+
+### Step 3: TEST - Run ALL Tests (MANDATORY GATE)
+
+**⛔ YOU CANNOT PROCEED TO STEP 4 UNTIL ALL TESTS PASS ⛔**
+
+Run these commands and verify they ALL pass:
+
+```bash
+# Frontend tests (run from project root)
+npm run lint                    # MUST show 0 errors
+npm start &                     # Start dev server
+# Use Playwright MCP to test UI (see below)
+
+# Backend tests (run from backend/)
+cd backend
+source venv/bin/activate
+pytest                          # MUST show all tests pass
+pytest --cov=app                # Check coverage (optional but recommended)
+```
+
+**Frontend UI Testing with Playwright MCP:**
+1. Navigate to http://localhost:8080
+2. Take screenshots of key UI states
+3. Test all user interactions (clicks, forms, navigation)
+4. Verify no console errors in browser
+
+**If ANY test fails:**
+- DO NOT proceed to commit
+- Fix the issue first
+- Re-run ALL tests
+- Only continue when everything passes
+
+### Step 4: DOCUMENT - Update CHANGELOG.md
+```markdown
+## [Unreleased]
+
+### Added
+- <describe what you added for issue #X>
+```
+
+### Step 5: COMMIT - Create a Git Commit
+```bash
+git add <specific-files>        # Add only relevant files
+git status                      # Verify what's being committed
+git commit -m "feat: <description>. Closes #<number>"
+```
+
+### Step 6: PUSH - Push to Remote Branch
+```bash
+git push origin <branch-name>
+```
+
+### Step 7: PR - Create Pull Request
+```bash
+gh pr create --base main --title "<type>: <description>" --body "$(cat <<'EOF'
+## Summary
+- <what this PR does>
+
+## Testing Done
+- [ ] `npm run lint` passes (0 errors)
+- [ ] `pytest` passes (all tests)
+- [ ] UI tested with Playwright MCP
+- [ ] Screenshots taken
+
+## Issue
+Closes #<number>
+EOF
+)"
+```
+
+### Step 8: WAIT - Wait for PR to be Merged
+- The Orchestrator will review and merge your PR
+- Check PR status: `gh pr view <pr-number>`
+- **DO NOT start the next issue until your PR is merged**
+
+### Step 9: SYNC - Update Your Branch After Merge
+```bash
+git fetch origin main
+git rebase origin/main
+```
+
+### Step 10: NEXT - Start Next Issue
+- Only now can you pick your next issue
+- Return to Step 1
+
+---
+
+## 🚫 HARD RULES - Never Break These
+
+1. **NO COMMIT WITHOUT PASSING TESTS** - If `npm run lint` or `pytest` fails, you cannot commit
+2. **NO PR WITHOUT TESTING** - Every PR must include proof that tests passed
+3. **NO STARTING NEXT ISSUE** - Until current PR is merged to main
+4. **ONE ISSUE AT A TIME** - Never work on multiple issues simultaneously
+5. **ALWAYS CREATE A PR** - Every completed task needs a PR, no direct pushes to main
 
 ---
 
@@ -254,17 +344,29 @@ Playwright MCP commands are available through the MCP tools. Use them for:
 
 ---
 
-## Verification Checklist
+## Verification Checklist (Pre-Commit Gate)
 
-Before marking work complete:
-- [ ] App runs without console errors
-- [ ] `npm run lint` passes with 0 errors
-- [ ] Backend `pytest` passes
-- [ ] **UI tested with Playwright MCP** (screenshots taken)
+**⛔ ALL items must be checked before you can commit ⛔**
+
+### Required Tests (must pass)
+- [ ] `npm run lint` - 0 errors (frontend)
+- [ ] `pytest` - all tests pass (backend)
+- [ ] Playwright MCP UI test - screenshots taken, no errors
+
+### Code Quality
+- [ ] App runs without console errors (`npm start`)
 - [ ] Navigation works correctly
-- [ ] i18n used for all text
+- [ ] i18n used for all user-facing text
 - [ ] No hardcoded URLs or secrets
-- [ ] CHANGELOG.md updated
+- [ ] No `console.log` or debug statements left in code
+
+### Documentation
+- [ ] CHANGELOG.md updated with changes
+
+### Git Workflow
+- [ ] Changes committed with proper message format
+- [ ] PR created with test results in description
+- [ ] Waiting for Orchestrator to merge before starting next task
 
 ---
 
