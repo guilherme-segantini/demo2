@@ -1,0 +1,18 @@
+/* Application-specific styles */
+
+/* Signal item styling */
+.signalItem {
+    color: #107e3e;
+    padding: 0.25rem 0;
+}
+
+/* Noise item styling */
+.noiseItem {
+    color: #bb0000;
+    padding: 0.25rem 0;
+}
+
+/* Card content padding */
+.sapFCard .sapMVBox {
+    padding: 0.5rem;
+}

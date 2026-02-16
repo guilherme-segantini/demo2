@@ -1,0 +1,16 @@
+{
+  "name": "tech-trends-radar",
+  "version": "1.0.0",
+  "description": "Technology Trends Radar - SAPUI5 Application",
+  "scripts": {
+    "start": "ui5 serve --open index.html",
+    "build": "ui5 build --clean-dest --all",
+    "lint": "ui5lint",
+    "test": "ui5 serve --open test/testsuite.qunit.html"
+  },
+  "devDependencies": {
+    "@ui5/cli": "^3.9.0",
+    "@ui5/linter": "^1.0.0",
+    "ui5-middleware-livereload": "^3.0.0"
+  }
+}

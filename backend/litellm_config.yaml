@@ -1,0 +1,18 @@
+model_list:
+  - model_name: grok-3
+    litellm_params:
+      model: xai/grok-3
+      api_key: os.environ/XAI_API_KEY
+  - model_name: grok-beta
+    litellm_params:
+      model: xai/grok-3
+      api_key: os.environ/XAI_API_KEY
+
+general_settings:
+  master_key: sk-radar-local-dev
+
+litellm_settings:
+  drop_params: true
+  set_verbose: false
+  request_timeout: 120
+  num_retries: 2

@@ -1,0 +1,71 @@
+{
+  "radar_date": "2026-02-03",
+  "trends": [
+    {
+      "focus_area": "voice_ai_ux",
+      "tool_name": "LiveKit Agents",
+      "classification": "signal",
+      "confidence_score": 92,
+      "technical_insight": "Sub-200ms voice-to-voice latency with WebRTC. Production-ready SDK with built-in turn detection and interruption handling.",
+      "signal_evidence": ["Published benchmarks showing <200ms latency", "Production case studies from Cartesia and PlayHT"],
+      "noise_indicators": [],
+      "architectural_verdict": true,
+      "timestamp": "2026-02-03T08:00:00Z"
+    },
+    {
+      "focus_area": "voice_ai_ux",
+      "tool_name": "VoiceGPT Pro",
+      "classification": "noise",
+      "confidence_score": 78,
+      "technical_insight": "Marketing claims of 'revolutionary' voice AI without published latency metrics or architecture details.",
+      "signal_evidence": [],
+      "noise_indicators": ["No published benchmarks", "Vague technical claims", "No production references"],
+      "architectural_verdict": false,
+      "timestamp": "2026-02-03T08:00:00Z"
+    },
+    {
+      "focus_area": "agent_orchestration",
+      "tool_name": "LangGraph",
+      "classification": "signal",
+      "confidence_score": 88,
+      "technical_insight": "Graph-based agent orchestration with built-in state management, checkpointing, and human-in-the-loop support.",
+      "signal_evidence": ["Open source with active community", "Clear documentation and examples", "Used by major enterprises"],
+      "noise_indicators": [],
+      "architectural_verdict": true,
+      "timestamp": "2026-02-03T08:00:00Z"
+    },
+    {
+      "focus_area": "agent_orchestration",
+      "tool_name": "AgentFlow AI",
+      "classification": "noise",
+      "confidence_score": 65,
+      "technical_insight": "Closed-source orchestration platform with premium pricing but limited technical documentation.",
+      "signal_evidence": [],
+      "noise_indicators": ["No public API documentation", "Vendor lock-in concerns", "Limited integration options"],
+      "architectural_verdict": false,
+      "timestamp": "2026-02-03T08:00:00Z"
+    },
+    {
+      "focus_area": "durable_runtime",
+      "tool_name": "Temporal",
+      "classification": "signal",
+      "confidence_score": 95,
+      "technical_insight": "Battle-tested durable execution with automatic retries, timeouts, and workflow versioning. Proven at scale by Netflix, Snap, and Stripe.",
+      "signal_evidence": ["Open source core", "Extensive production deployments", "Strong SDK support for multiple languages"],
+      "noise_indicators": [],
+      "architectural_verdict": true,
+      "timestamp": "2026-02-03T08:00:00Z"
+    },
+    {
+      "focus_area": "durable_runtime",
+      "tool_name": "WorkflowMagic",
+      "classification": "noise",
+      "confidence_score": 55,
+      "technical_insight": "New entrant claiming 'serverless durability' without clear explanation of failure handling or state persistence.",
+      "signal_evidence": [],
+      "noise_indicators": ["No failure recovery documentation", "Unclear pricing model", "No enterprise references"],
+      "architectural_verdict": false,
+      "timestamp": "2026-02-03T08:00:00Z"
+    }
+  ]
+}

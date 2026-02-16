@@ -1,0 +1,82 @@
+<mvc:View
+    controllerName="tech.trends.radar.controller.RadarView"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:grid="sap.ui.layout.cssgrid"
+    xmlns:core="sap.ui.core">
+    <Page
+        id="radarPage"
+        title="{i18n>radarViewTitle}"
+        showNavButton="false">
+        <content>
+            <grid:CSSGrid id="focusAreaGrid" gridTemplateColumns="repeat(auto-fit, minmax(20rem, 1fr))" gridGap="1rem" class="sapUiSmallMargin">
+                <!-- Voice AI Card -->
+                <f:Card id="voiceAiCard" class="sapUiSmallMargin">
+                    <f:header>
+                        <f:cards.Header
+                            title="{i18n>voiceAiTitle}"
+                            subtitle="{i18n>voiceAiSubtitle}"
+                            iconSrc="sap-icon://microphone" />
+                    </f:header>
+                    <f:content>
+                        <VBox class="sapUiSmallMargin">
+                            <Title text="{i18n>signalLabel}" level="H5" class="sapUiTinyMarginBottom" />
+                            <VBox id="voiceAiSignals" items="{voiceAiSignals>/items}" class="sapUiTinyMarginBottom">
+                                <core:Fragment fragmentName="tech.trends.radar.view.fragment.SignalItem" type="XML" />
+                            </VBox>
+                            <Title text="{i18n>noiseLabel}" level="H5" class="sapUiTinyMarginBottom" />
+                            <VBox id="voiceAiNoise" items="{voiceAiNoise>/items}">
+                                <core:Fragment fragmentName="tech.trends.radar.view.fragment.NoiseItem" type="XML" />
+                            </VBox>
+                        </VBox>
+                    </f:content>
+                </f:Card>
+
+                <!-- Agent Orchestration Card -->
+                <f:Card id="agentOrchCard" class="sapUiSmallMargin">
+                    <f:header>
+                        <f:cards.Header
+                            title="{i18n>agentOrchTitle}"
+                            subtitle="{i18n>agentOrchSubtitle}"
+                            iconSrc="sap-icon://process" />
+                    </f:header>
+                    <f:content>
+                        <VBox class="sapUiSmallMargin">
+                            <Title text="{i18n>signalLabel}" level="H5" class="sapUiTinyMarginBottom" />
+                            <VBox id="agentOrchSignals" items="{agentOrchSignals>/items}" class="sapUiTinyMarginBottom">
+                                <core:Fragment fragmentName="tech.trends.radar.view.fragment.SignalItem" type="XML" />
+                            </VBox>
+                            <Title text="{i18n>noiseLabel}" level="H5" class="sapUiTinyMarginBottom" />
+                            <VBox id="agentOrchNoise" items="{agentOrchNoise>/items}">
+                                <core:Fragment fragmentName="tech.trends.radar.view.fragment.NoiseItem" type="XML" />
+                            </VBox>
+                        </VBox>
+                    </f:content>
+                </f:Card>
+
+                <!-- Durable Runtime Card -->
+                <f:Card id="durableRuntimeCard" class="sapUiSmallMargin">
+                    <f:header>
+                        <f:cards.Header
+                            title="{i18n>durableRuntimeTitle}"
+                            subtitle="{i18n>durableRuntimeSubtitle}"
+                            iconSrc="sap-icon://it-host" />
+                    </f:header>
+                    <f:content>
+                        <VBox class="sapUiSmallMargin">
+                            <Title text="{i18n>signalLabel}" level="H5" class="sapUiTinyMarginBottom" />
+                            <VBox id="durableRuntimeSignals" items="{durableRuntimeSignals>/items}" class="sapUiTinyMarginBottom">
+                                <core:Fragment fragmentName="tech.trends.radar.view.fragment.SignalItem" type="XML" />
+                            </VBox>
+                            <Title text="{i18n>noiseLabel}" level="H5" class="sapUiTinyMarginBottom" />
+                            <VBox id="durableRuntimeNoise" items="{durableRuntimeNoise>/items}">
+                                <core:Fragment fragmentName="tech.trends.radar.view.fragment.NoiseItem" type="XML" />
+                            </VBox>
+                        </VBox>
+                    </f:content>
+                </f:Card>
+            </grid:CSSGrid>
+        </content>
+    </Page>
+</mvc:View>
