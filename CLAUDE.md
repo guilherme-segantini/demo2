@@ -1,23 +1,47 @@
 # CLAUDE.md
 
+## ⚠️ CRITICAL: SCAFFOLDING FIRST
+
+**Before working on ANY task, check if Issue #15 (Scaffolding) is complete.**
+
+```bash
+gh issue view 15
+```
+
+- If #15 is **OPEN**: You are the Scaffolding Agent. Work on #15 first.
+- If #15 is **CLOSED**: Scaffolding is complete. Proceed to your assigned issue.
+
+**All issues #1-#14 are BLOCKED until #15 is merged to main.**
+
+---
+
 ## Quick Reference
 
 | File | Use When... |
 |------|-------------|
 | `skills/sapui5.md` | Developing SAPUI5/UI5 applications |
+| `PRD.md` | Understanding product requirements |
+| `PLAN.md` | Reviewing execution plan |
 
 ## Project Setup
 
-**Tech Stack:** SAPUI5 1.120+, JavaScript (ES6+), OData V4 / JSON models
+**Tech Stack:** SAPUI5 1.120+, JavaScript (ES6+), FastAPI, SQLite, LiteLLM
 
 ```bash
-npm start          # Start dev server
+# Frontend
+npm install        # Install dependencies
+npm start          # Start dev server (localhost:8080)
 npm run build      # Build for production
 npm run lint       # Run UI5 linter
-npm test           # Run tests
-```
 
-See `skills/sapui5.md` for detailed patterns and structure.
+# Backend
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload  # Start API (localhost:8000)
+pytest             # Run tests
+```
 
 ## For litellm setup with generative AI Hub
 
@@ -33,80 +57,124 @@ See `skills/sapui5.md` for detailed patterns and structure.
 
 ---
 
+## Multi-Agent Development (9 Agents)
+
+This project uses **9 parallel Claude agents** working on isolated branches via Git worktrees.
+
+### ⚠️ Scaffolding Agent Runs First
+
+The Scaffolding Agent (#15) must complete and merge before any other agent starts work.
+
+### Worktree Structure
+
+| Directory | Branch | Agent | Issue(s) |
+|-----------|--------|-------|----------|
+| `demo2-scaffold/` | `feature/scaffolding` | **Scaffolding** | #15 (FIRST) |
+| `demo2/` | `main` | Orchestrator | #13 |
+| `demo2-fe1/` | `feature/frontend-dev-1` | Frontend Dev 1 | #1, #7 |
+| `demo2-fe2/` | `feature/frontend-dev-2` | Frontend Dev 2 | #2, #8 |
+| `demo2-be1/` | `feature/backend-dev-1` | Backend Dev 1 | #3, #9 |
+| `demo2-be2/` | `feature/backend-dev-2` | Backend Dev 2 | #4, #10 |
+| `demo2-prompt/` | `feature/prompt-engineer` | Prompt Engineer | #5, #11 |
+| `demo2-qa/` | `feature/problem-finder` | Problem Finder | #6, #12 |
+| `demo2-devops/` | `feature/devops` | DevOps | #14 |
+
+### Execution Order
+
+```
+Phase 0: Scaffolding Agent completes #15 and merges to main
+    ↓
+Phase 1: All 8 agents rebase on main and start their first issue (#1-#6, #13, #14)
+    ↓
+Phase 2: Agents complete second issues (#7-#12) after first issues merge
+```
+
+### Starting an Agent Session
+
+```bash
+# STEP 1: Scaffolding Agent (MUST RUN FIRST)
+cd /Users/I769068/projects/scaling-productivity/demo2-scaffold && claude
+> Work on issue #15
+
+# STEP 2: After #15 is merged, start remaining agents
+cd /Users/I769068/projects/scaling-productivity/demo2 && claude          # Orchestrator
+cd /Users/I769068/projects/scaling-productivity/demo2-fe1 && claude      # Frontend Dev 1
+cd /Users/I769068/projects/scaling-productivity/demo2-fe2 && claude      # Frontend Dev 2
+cd /Users/I769068/projects/scaling-productivity/demo2-be1 && claude      # Backend Dev 1
+cd /Users/I769068/projects/scaling-productivity/demo2-be2 && claude      # Backend Dev 2
+cd /Users/I769068/projects/scaling-productivity/demo2-prompt && claude   # Prompt Engineer
+cd /Users/I769068/projects/scaling-productivity/demo2-qa && claude       # Problem Finder
+cd /Users/I769068/projects/scaling-productivity/demo2-devops && claude   # DevOps
+```
+
+---
+
+## Agent Startup Checklist
+
+When starting a new session:
+
+1. **Check if scaffolding is complete:**
+   ```bash
+   gh issue view 15
+   ```
+   - If OPEN and you're in `demo2-scaffold/`: Work on #15
+   - If OPEN and you're elsewhere: STOP - wait for #15 to complete
+   - If CLOSED: Continue to step 2
+
+2. **Check GitHub auth:** `gh auth status`
+
+3. **Sync with main:**
+   ```bash
+   git fetch origin main
+   git rebase origin/main
+   ```
+
+4. **View your issues:**
+   ```bash
+   gh issue list --label "track-a"     # Frontend agents
+   gh issue list --label "track-b"     # Backend agents
+   gh issue list --label "track-c"     # Prompt Engineer
+   gh issue list --label "qa"          # Problem Finder
+   gh issue list --label "integration" # Orchestrator, DevOps
+   ```
+
+5. **Pick ONE issue** and add `in-progress` label:
+   ```bash
+   gh issue edit <number> --add-label "in-progress"
+   ```
+
+6. **Do the work** - implement, test, document
+
+7. **Complete the full cycle** (see below)
+
+---
+
 ## Task & Issue Tracking
 
 **GitHub Issues is the single source of truth for all task management.**
 
-Use `gh` CLI commands for tracking—never rely on memory or ad-hoc notes.
+### ONE TASK AT A TIME RULE
 
-### Issue Management
-
-Before doing any work:
-- Check `gh auth status` and list open issues first
-- Ensure an issue exists for the task—create one if it doesn't
-
-**Creating issues:**
-- Use a short, descriptive title
-- Include acceptance criteria as checkboxes
-- Add technical notes, constraints, or dependencies
-- Apply labels: `feature`, `bug`, `chore`, `docs`, `spike`, `blocked`, `ready`
-
-**For bugs, include:**
-- Steps to reproduce
-- Expected vs actual behavior
-- Environment details
-
-### Working on Tasks
-
-**When starting:**
-1. Verify the issue exists (`gh issue view <number>`)
-2. Add `in-progress` label
-3. Create a branch linked to the issue (`feature/#123-description`)
-
-**During work:**
-- Add progress comments to the issue
-- Reference issue numbers in commits (`Part of #123`)
-- Update labels if blocked
-
-### Completing Tasks
-
-**ONE TASK AT A TIME RULE:**
 Complete the full cycle for one issue before starting another. Do not work on multiple issues simultaneously.
 
-**Complete workflow (must follow in order):**
+### Complete Workflow (must follow in order)
+
 1. **Code** - Implement the changes for the issue
-2. **Test** - Run verification checklist (see below):
+2. **Test** - Run verification checklist:
    - [ ] App runs without console errors (`npm start`)
    - [ ] `npm run lint` passes with 0 errors
-   - [ ] `npm test` passes (all unit tests)
+   - [ ] Backend tests pass (`cd backend && pytest`)
    - [ ] Manual testing of the feature/fix
    - [ ] i18n used for all text
    - [ ] No hardcoded URLs or secrets
 3. **Document** - Update CHANGELOG.md with your changes
-4. **Commit** - Commit your work with issue reference: `git commit -m "feat: description. Part of #123"`
-5. **Push** - Push your branch to remote: `git push origin <branch-name>`
-6. **PR** - Create a pull request: `gh pr create --base main --title "Description" --body "Closes #123"`
-7. **Merge** - Merge the PR: `gh pr merge <number> --squash`
-8. **Verify** - Issue auto-closes when PR is merged
-9. **Next** - Only now pick the next issue from your backlog
+4. **Commit** - `git commit -m "feat: description. Closes #<number>"`
+5. **Push** - `git push origin <branch-name>`
+6. **PR** - `gh pr create --base main --title "Description" --body "Closes #<number>"`
+7. **Merge** - `gh pr merge <number> --squash`
+8. **Next** - Only now pick the next issue
 
 **Do not skip testing.** If tests fail, fix them before committing.
-
-**Auto-close keywords in commits/PRs:**
-- `Closes #123`
-- `Fixes #123`
-- `Resolves #123`
-
-### Useful Queries
-
-```bash
-gh issue list                      # All open issues
-gh issue list --assignee @me       # Your assigned issues
-gh issue list --label "priority-high"  # High priority
-gh issue list --label "ready"      # Ready to work
-gh issue list --label "bug"        # Bugs only
-gh issue list --search "keyword"   # Search issues
-```
 
 ---
 
@@ -122,38 +190,35 @@ gh issue list --search "keyword"   # Search issues
 - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 - Reference issues: `Closes #123`, `Fixes #57`, `Part of #42`
 
-### Workflow Preferences
-- Use rebase for personal branches, merge for shared branches
-- Use `--force-with-lease` after rebasing
-- Prefer squash merge for features
+### Syncing with Main
 
-### PR Description
-Include:
-- What the PR does and why
-- List of changes made
-- Related issue numbers
-- Type of change (bug fix, feature, breaking change)
-- Testing checklist
+```bash
+git fetch origin main
+git rebase origin/main
+git push origin <branch> --force-with-lease
+```
+
+### Creating and Merging PRs
+
+```bash
+gh pr create --base main --title "Description" --body "Closes #<number>"
+gh pr merge <number> --squash
+```
 
 ---
 
 ## Changelog Management
 
-Maintain `CHANGELOG.md` as a **first-class artifact**—not a release note afterthought.
+Maintain `CHANGELOG.md` as a **first-class artifact**.
 
-### Purpose
-- Record **what** was done and **why**
-- Track **what was intentionally deferred** and the rationale
-- Enable AI to resume work without reintroducing rejected ideas
-- Provide humans a curated, readable history
+### When to Update
+- After completing a feature or fix
+- When deferring or rejecting an approach (document why)
+- Before ending a work session
 
 ### Format
 
-Based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/):
-
 ```markdown
-# Changelog
-
 ## [Unreleased]
 
 ### Added
@@ -163,166 +228,64 @@ Based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/):
 - Modified behavior description
 
 ### Deferred
-- Feature X - Rationale: Not needed for PoC scope (YAGNI)
-
-## [1.0.0] - 2025-01-30
-
-### Added
-- Initial feature set
+- Feature X - Rationale: reason
 ```
 
-### Change Types
+---
 
-| Type | Use For |
-|------|---------|
-| **Added** | New features |
-| **Changed** | Changes in existing functionality |
-| **Deprecated** | Soon-to-be removed features |
-| **Removed** | Now removed features |
-| **Fixed** | Bug fixes |
-| **Security** | Vulnerability fixes |
-| **Deferred** | Intentionally postponed or rejected ideas (with rationale) |
+## Verification Checklist
 
-### Guidelines
+Before marking work complete:
+- [ ] App runs without console errors
+- [ ] `npm run lint` passes with 0 errors
+- [ ] Backend `pytest` passes
+- [ ] Navigation works correctly
+- [ ] i18n used for all text
+- [ ] No hardcoded URLs or secrets
+- [ ] CHANGELOG.md updated
 
-**Do:**
-- Keep `[Unreleased]` section at the top
-- Use ISO 8601 date format: `YYYY-MM-DD`
-- List newest versions first
-- Include rationale for significant decisions
-- Record deferred items to prevent revisiting rejected ideas
-- Update with each meaningful change, not just at release
+---
 
-**Don't:**
-- Dump git logs into the changelog
-- Use vague descriptions ("fixed stuff", "updates")
-- Omit reasoning behind changes
-- Wait until release to write entries
+## Issue Dependencies
 
-### When to Update
-- After completing a feature or fix
-- When deferring or rejecting an approach (document why)
-- When making architectural decisions
-- Before ending a work session (capture context for continuity)
+| Issue | Agent | Blocked By |
+|-------|-------|------------|
+| #15 | Scaffolding | None (START FIRST) |
+| #1 | Frontend Dev 1 | #15 |
+| #2 | Frontend Dev 2 | #15 |
+| #3 | Backend Dev 1 | #15 |
+| #4 | Backend Dev 2 | #15 |
+| #5 | Prompt Engineer | #15 |
+| #6 | Problem Finder | #15 |
+| #7 | Frontend Dev 1 | #15, #1 |
+| #8 | Frontend Dev 2 | #15, #2 |
+| #9 | Backend Dev 1 | #15, #3, #5 |
+| #10 | Backend Dev 2 | #15, #4 |
+| #11 | Prompt Engineer | #15, #5 |
+| #12 | Problem Finder | #15, #6 |
+| #13 | Orchestrator | #15 |
+| #14 | DevOps | #15 |
+
+---
+
+## Useful Commands
+
+```bash
+git worktree list                    # See all worktrees
+gh issue list                        # All open issues
+gh issue view <number>               # Issue details
+gh pr list                           # Open PRs
+gh pr view <number>                  # PR details
+gh pr merge <number> --squash        # Merge PR
+```
 
 ---
 
 ## Decisions Made
-- [Document decisions as you make them]
+- 9-agent parallel development with git worktrees
+- Scaffolding must complete before other work begins
+- One task at a time per agent
+- Squash merge for all PRs
 
 ## Known Issues
-- [Track problems or limitations]
-
----
-
-## Multi-Agent Development (Git Worktrees)
-
-This project uses **3 parallel Claude agents** working on isolated branches via Git worktrees.
-
-### Worktree Structure
-
-| Directory | Branch | Track | Focus |
-|-----------|--------|-------|-------|
-| `technologies-trend/` | `main` | Orchestrator | Merge PRs, coordination |
-| `track-a/` | `feature/track-a` | Track A | Frontend (SAPUI5) |
-| `track-b/` | `feature/track-b` | Track B | Backend (FastAPI) |
-| `track-c/` | `feature/track-c` | Track C | AI/Prompts |
-
-### Starting an Agent Session
-
-```bash
-# Track A - Frontend Developer
-cd /Users/I769068/projects/scaling-productivity/track-a && claude
-
-# Track B - Backend Developer
-cd /Users/I769068/projects/scaling-productivity/track-b && claude
-
-# Track C - AI/Prompts Developer
-cd /Users/I769068/projects/scaling-productivity/track-c && claude
-```
-
-### Agent Startup Checklist
-
-When starting a new session as a track agent:
-
-1. **Read this CLAUDE.md** to understand your role and workflow rules
-2. **Check GitHub auth:** `gh auth status`
-3. **Sync with main:** `git fetch origin main && git rebase origin/main`
-4. **View your backlog:** `gh issue list --label "track-X"` (replace X with a, b, or c)
-5. **Pick ONE issue** and add `in-progress` label: `gh issue edit <number> --add-label "in-progress"`
-6. **Do the work** - stay in your track's directory (`webapp/`, `backend/`, or `prompts/`)
-7. **Test everything** - run `npm start`, `npm run lint`, `npm test` and verify manually
-8. **Update CHANGELOG.md** with your changes
-9. **Commit with issue reference:** `git commit -m "feat: description. Part of #<number>"`
-10. **Push to remote:** `git push origin feature/track-X`
-11. **Create a PR:** `gh pr create --base main --title "[Track X] Description" --body "Closes #<number>"`
-12. **Merge the PR:** `gh pr merge <number> --squash` (or wait for review if required)
-13. **Repeat** - Go back to step 4 and pick the next issue
-
-**Work on one issue at a time. Complete the full cycle before starting another.**
-
-### Agent Responsibilities
-
-**Track A Agent (Frontend):**
-- GitHub Issues: #5, #8, #9, #10, #11, #12
-- Files: `webapp/**`
-- Label filter: `gh issue list --label "track-a"`
-
-**Track B Agent (Backend):**
-- GitHub Issues: #2, #3, #4, #13, #14, #15
-- Files: `backend/**`
-- Label filter: `gh issue list --label "track-b"`
-
-**Track C Agent (AI/Prompts):**
-- GitHub Issues: #6, #16, #17, #18
-- Files: `prompts/**`
-- Label filter: `gh issue list --label "track-c"`
-
-### Workflow Rules
-
-**CRITICAL: One Task at a Time**
-- Work on exactly ONE issue per cycle
-- Complete the full workflow before picking the next issue
-- Never have multiple issues "in progress" simultaneously
-
-**Per-Issue Workflow:**
-1. **Check issues first:** `gh issue list --label "track-X"`
-2. **Claim ONE task:** Add `in-progress` label before starting
-3. **Stay in your lane:** Only modify files in your track's directory
-4. **Implement:** Write code, reference issue numbers in commits (`Part of #8`)
-5. **Test thoroughly:** Run `npm start`, `npm run lint`, `npm test` - all must pass
-6. **Update changelog:** Record changes in CHANGELOG.md
-7. **Commit & push:** `git commit` → `git push`
-8. **Create PR:** Target `main` branch with `gh pr create`
-9. **Merge the PR:** Use squash merge with `gh pr merge <number> --squash`
-10. **Repeat:** Go back to step 1 for the next issue
-
-### Syncing with Main
-
-```bash
-# Pull latest from main (do this before starting new work)
-git fetch origin main
-git rebase origin/main
-
-# Push your branch
-git push origin feature/track-a --force-with-lease
-```
-
-### Creating and Merging a PR
-
-```bash
-# Create the PR
-gh pr create --base main --title "[Track A] Implement RadarView" --body "Closes #9"
-
-# Merge the PR (squash merge)
-gh pr merge <number> --squash
-```
-
-### Useful Commands
-
-```bash
-git worktree list                    # See all worktrees
-gh issue list --label "track-a"      # Your backlog
-gh pr list                           # Open PRs
-gh pr view <number>                  # PR details
-```
+- [Track problems or limitations as discovered]
