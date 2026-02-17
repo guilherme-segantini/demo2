@@ -12,42 +12,44 @@
 
 ## Current Status
 
-### Open Issues
+### Phase 1 Issues (Ready to Start)
 
 | Issue | Agent | Title | Status |
 |-------|-------|-------|--------|
-| #18 | Frontend Dev 1 | UI5 App Shell & Base Structure | Ready |
-| #19 | Frontend Dev 2 | Voice AI Panel Component | Ready |
-| #20 | Backend Dev 1 | FastAPI App & GET /api/radar Endpoint | Ready |
+| #1 | Frontend Dev 1 | UI5 App Shell & Base Structure | Ready |
+| #2 | Frontend Dev 2 | Voice AI Panel with Signal/Noise Display | Ready |
+| #3 | Backend Dev 1 | FastAPI App & GET /api/radar Endpoint | Ready |
+| #4 | Backend Dev 2 | SQLite Database & Models | Ready |
+| #5 | Prompt Engineer | Grok Service & Voice AI Prompt | Ready |
+| #6 | Problem Finder | Project Verification & Documentation | Ready |
+| #13 | Orchestrator | Review, Merge PRs & Coordinate Development | Ready |
+| #14 | DevOps | CI/CD Pipeline, Docker & Deployment Setup | Ready |
 
-### Completed Issues
+### Phase 2 Issues (Blocked by Phase 1)
 
-| Issue | Title | Status |
-|-------|-------|--------|
-| #1 | [Track A] Set up SAPUI5 project structure | CLOSED |
-| #2 | [Track A] Implement RadarView with 3 focus area cards | CLOSED |
-| #3 | [Track A] Add mock data and JSON model binding | CLOSED |
-| #4 | [Track B] Set up FastAPI project structure | CLOSED |
-| #5 | [Track B] Implement /api/radar endpoints | CLOSED |
-| #6 | [Track B] Integrate LiteLLM with xAI/Grok | CLOSED |
-| #7 | [Track C] Create Voice AI prompt template | CLOSED |
-| #8 | [Track C] Create Agent Orchestration prompt template | CLOSED |
-| #9 | [Track C] Create Durable Runtime prompt template | CLOSED |
+| Issue | Agent | Title | Blocked By |
+|-------|-------|-------|------------|
+| #7 | Frontend Dev 1 | Agent Orchestration Panel | #1 |
+| #8 | Frontend Dev 2 | Durable Runtime Panel | #2 |
+| #9 | Backend Dev 1 | POST /api/radar/refresh Endpoint | #3, #5 |
+| #10 | Backend Dev 2 | Database Query Functions & Historical Data | #4 |
+| #11 | Prompt Engineer | Agent Orchestration & Durable Runtime Prompts | #5 |
+| #12 | Problem Finder | Integration Testing & Bug Fixes | #6 |
 
 ---
 
 ## Agent Structure
 
-| Agent | Worktree | Branch | Focus | Current Issue |
-|-------|----------|--------|-------|---------------|
-| Orchestrator | demo2 | main | PR merging, coordination | - |
-| Frontend Dev 1 | demo2-fe1 | feature/frontend-dev-1 | UI5 components | #18 |
-| Frontend Dev 2 | demo2-fe2 | feature/frontend-dev-2 | UI5 views/styling | #19 |
-| Backend Dev 1 | demo2-be1 | feature/backend-dev-1 | API endpoints | #20 |
-| Backend Dev 2 | demo2-be2 | feature/backend-dev-2 | Database/models | - |
-| Prompt Engineer | demo2-prompt | feature/prompt-engineer | AI prompts | - |
-| Problem Finder | demo2-qa | feature/problem-finder | Testing/QA | - |
-| DevOps | demo2-devops | feature/devops | CI/CD pipeline | - |
+| Agent | Worktree | Branch | Focus | Phase 1 | Phase 2 |
+|-------|----------|--------|-------|---------|---------|
+| Orchestrator | demo2 | main | PR merging, coordination | #13 | - |
+| Frontend Dev 1 | demo2-fe1 | feature/frontend-dev-1 | UI5 components | #1 | #7 |
+| Frontend Dev 2 | demo2-fe2 | feature/frontend-dev-2 | UI5 views/styling | #2 | #8 |
+| Backend Dev 1 | demo2-be1 | feature/backend-dev-1 | API endpoints | #3 | #9 |
+| Backend Dev 2 | demo2-be2 | feature/backend-dev-2 | Database/models | #4 | #10 |
+| Prompt Engineer | demo2-prompt | feature/prompt-engineer | AI prompts | #5 | #11 |
+| Problem Finder | demo2-qa | feature/problem-finder | Testing/QA | #6 | #12 |
+| DevOps | demo2-devops | feature/devops | CI/CD pipeline | #14 | - |
 
 ---
 
@@ -99,7 +101,7 @@ demo2/
 | Frontend | SAP UI5 | 1.120+ |
 | Backend | FastAPI | 0.109+ |
 | Database | SQLite | 3.x |
-| AI | LiteLLM + SAP GenAI Hub | Latest |
+| AI | LiteLLM + xAI/Grok | Latest |
 | Testing | Playwright MCP | Latest |
 | CI/CD | GitHub Actions | - |
 | Python Env | uv | Latest |
@@ -267,7 +269,7 @@ cd /Users/I769068/projects/scaling-productivity/demo2-devops && claude
 - One task at a time per agent
 - Squash merge for all PRs
 - Playwright MCP for UI testing
-- SAP Generative AI Hub via LiteLLM (not direct Grok)
+- xAI/Grok via LiteLLM for AI provider
 - Daily batch refresh (not 30-minute)
 - **uv for Python environment management** (not venv/pip)
 - **Mandatory testing before commits**
