@@ -3,8 +3,10 @@
 import json
 import logging
 import os
+import re
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 
 import litellm
@@ -19,6 +21,84 @@ logger = logging.getLogger(__name__)
 LITELLM_BASE_URL = os.getenv("LITELLM_BASE_URL", "http://localhost:4010")
 LITELLM_API_KEY = os.getenv("LITELLM_API_KEY", "sk-radar-local-dev")
 GROK_MODEL = os.getenv("GROK_MODEL", "grok-3")
+
+# SAP Generative AI Hub configuration
+# See: https://docs.litellm.ai/docs/providers/sap
+AICORE_SERVICE_KEY = os.getenv("AICORE_SERVICE_KEY")  # Recommended: JSON service key
+AICORE_AUTH_URL = os.getenv("AICORE_AUTH_URL")
+AICORE_CLIENT_ID = os.getenv("AICORE_CLIENT_ID")
+AICORE_CLIENT_SECRET = os.getenv("AICORE_CLIENT_SECRET")
+AICORE_BASE_URL = os.getenv("AICORE_BASE_URL")
+AICORE_RESOURCE_GROUP = os.getenv("AICORE_RESOURCE_GROUP", "default")
+
+# Prompt file mapping
+PROMPT_FILES = {
+    "voice_ai_ux": "voice_ai_prompt.md",
+    "agent_orchestration": "agent_orchestration_prompt.md",
+    "durable_runtime": "durable_runtime_prompt.md",
+}
+
+# Project root for locating prompt files
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+PROMPTS_DIR = PROJECT_ROOT / "prompts"
+
+
+def is_sap_configured() -> bool:
+    """Check if SAP Generative AI Hub credentials are configured."""
+    # Check for service key (recommended method)
+    if AICORE_SERVICE_KEY:
+        return True
+    # Check for individual credentials
+    return all([AICORE_AUTH_URL, AICORE_CLIENT_ID, AICORE_CLIENT_SECRET, AICORE_BASE_URL])
+
+
+def get_model_name() -> str:
+    """Get the appropriate model name based on configuration."""
+    if is_sap_configured():
+        # Use SAP prefix for Generative AI Hub
+        return f"sap/{GROK_MODEL}"
+    # Default to openai prefix for local LiteLLM proxy
+    return f"openai/{GROK_MODEL}"
+
+
+def load_prompt(focus_area: str) -> Optional[str]:
+    """
+    Load prompt template from external markdown file.
+
+    Extracts the "User Prompt" section from the markdown file.
+    Returns None if file not found or parsing fails.
+    """
+    if focus_area not in PROMPT_FILES:
+        logger.warning(f"No prompt file mapping for focus area: {focus_area}")
+        return None
+
+    prompt_path = PROMPTS_DIR / PROMPT_FILES[focus_area]
+
+    if not prompt_path.exists():
+        logger.warning(f"Prompt file not found: {prompt_path}")
+        return None
+
+    try:
+        content = prompt_path.read_text(encoding="utf-8")
+
+        # Extract User Prompt section (everything after "## User Prompt")
+        user_prompt_match = re.search(
+            r"## User Prompt\s*\n(.*)",
+            content,
+            re.DOTALL | re.IGNORECASE,
+        )
+
+        if user_prompt_match:
+            user_prompt = user_prompt_match.group(1).strip()
+            logger.debug(f"Loaded external prompt for {focus_area} ({len(user_prompt)} chars)")
+            return user_prompt
+
+        logger.warning(f"No '## User Prompt' section found in {prompt_path}")
+        return None
+
+    except Exception as e:
+        logger.error(f"Error reading prompt file {prompt_path}: {e}")
+        return None
 
 # Retry configuration
 MAX_RETRIES = 3
@@ -122,20 +202,34 @@ def call_grok_with_retry(prompt: str) -> Optional[str]:
     """
     Call Grok API with exponential backoff retry logic.
 
+    Automatically selects SAP Generative AI Hub or local LiteLLM proxy
+    based on environment configuration.
+
     Returns response content string or None if all retries fail.
     """
     backoff = INITIAL_BACKOFF
+    model = get_model_name()
+
+    # Configure API parameters based on provider
+    api_params = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7,
+    }
+
+    if is_sap_configured():
+        # SAP Generative AI Hub - credentials are read from environment
+        # by LiteLLM automatically when using sap/ prefix
+        logger.debug(f"Using SAP Generative AI Hub with model: {model}")
+    else:
+        # Local LiteLLM proxy
+        api_params["api_base"] = LITELLM_BASE_URL
+        api_params["api_key"] = LITELLM_API_KEY
+        logger.debug(f"Using local LiteLLM proxy at {LITELLM_BASE_URL}")
 
     for attempt in range(MAX_RETRIES):
         try:
-            # Use openai/ prefix to route through LiteLLM proxy
-            response = litellm.completion(
-                model=f"openai/{GROK_MODEL}",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7,
-                api_base=LITELLM_BASE_URL,
-                api_key=LITELLM_API_KEY,
-            )
+            response = litellm.completion(**api_params)
             return response.choices[0].message.content.strip()
 
         except Exception as e:
@@ -154,17 +248,29 @@ def analyze_focus_area(focus_area: str) -> Optional[list[dict]]:
     """
     Analyze a single focus area using Grok via LiteLLM.
 
+    Loads prompt from external markdown file if available,
+    falls back to inline template otherwise.
+
     Returns list of trend dictionaries or None if analysis fails.
     """
     if focus_area not in FOCUS_AREAS:
         raise ValueError(f"Unknown focus area: {focus_area}")
 
-    area_config = FOCUS_AREAS[focus_area]
-    prompt = DISCOVERY_PROMPT_TEMPLATE.format(
-        focus_area=focus_area,
-        focus_area_name=area_config["name"],
-        evaluation_criteria=area_config["evaluation_criteria"],
-    )
+    # Try to load external prompt first
+    external_prompt = load_prompt(focus_area)
+
+    if external_prompt:
+        prompt = external_prompt
+        logger.info(f"Using external prompt for {focus_area}")
+    else:
+        # Fall back to inline template
+        area_config = FOCUS_AREAS[focus_area]
+        prompt = DISCOVERY_PROMPT_TEMPLATE.format(
+            focus_area=focus_area,
+            focus_area_name=area_config["name"],
+            evaluation_criteria=area_config["evaluation_criteria"],
+        )
+        logger.info(f"Using inline template for {focus_area}")
 
     logger.info(f"Analyzing focus area: {focus_area}")
 
@@ -237,26 +343,36 @@ def check_api_connection() -> dict:
     """
     Check if the Grok API connection is working.
 
-    Returns dict with status and message.
+    Returns dict with status, provider, and message.
     """
+    model = get_model_name()
+    provider = "sap_genai_hub" if is_sap_configured() else "litellm_proxy"
+
     try:
-        # Use openai/ prefix to route through LiteLLM proxy
-        response = litellm.completion(
-            model=f"openai/{GROK_MODEL}",
-            messages=[{"role": "user", "content": "Say 'OK' if you can hear me."}],
-            max_tokens=10,
-            api_base=LITELLM_BASE_URL,
-            api_key=LITELLM_API_KEY,
-        )
+        # Configure API parameters based on provider
+        api_params = {
+            "model": model,
+            "messages": [{"role": "user", "content": "Say 'OK' if you can hear me."}],
+            "max_tokens": 10,
+        }
+
+        if not is_sap_configured():
+            api_params["api_base"] = LITELLM_BASE_URL
+            api_params["api_key"] = LITELLM_API_KEY
+
+        response = litellm.completion(**api_params)
+
         return {
             "status": "ok",
             "message": "Grok API connection successful",
+            "provider": provider,
             "model": GROK_MODEL,
-            "litellm_base_url": LITELLM_BASE_URL,
+            "litellm_base_url": LITELLM_BASE_URL if not is_sap_configured() else None,
         }
     except Exception as e:
         return {
             "status": "error",
             "message": f"Grok API connection failed: {str(e)}",
-            "litellm_base_url": LITELLM_BASE_URL,
+            "provider": provider,
+            "litellm_base_url": LITELLM_BASE_URL if not is_sap_configured() else None,
         }
