@@ -9,8 +9,17 @@ sap.ui.define([
     return BaseController.extend("tech.trends.radar.controller.RadarView", {
         onInit: function () {
             // Wait for radar model to load data
-            var oRadarModel = this.getOwnerComponent().getModel("radar");
-            oRadarModel.attachRequestCompleted(this._onDataLoaded, this);
+            var oComponent = this.getOwnerComponent();
+            if (oComponent) {
+                var oRadarModel = oComponent.getModel("radar");
+                if (oRadarModel) {
+                    oRadarModel.attachRequestCompleted(this._onDataLoaded, this);
+                    // If data already loaded, process it
+                    if (oRadarModel.getData() && oRadarModel.getData().trends) {
+                        this._onDataLoaded();
+                    }
+                }
+            }
         },
 
         _onDataLoaded: function () {

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- **UI5 manifest.json routing configuration** - Migrated to manifest version 2.0.0 format with correct routing config (`type: "View"`, `path` instead of `viewPath`, removed deprecated `async` property). Fixes app shell initialization and linting errors.
+- **RadarView controller null checks** - Added defensive null checks for `getOwnerComponent()` and model retrieval in onInit to handle timing issues during view creation.
+
 ## [0.1.0] - 2026-02-16
 
 ### Scaffolding Complete ✅
