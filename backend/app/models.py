@@ -1,6 +1,6 @@
 """SQLite ORM models for CodeScale Research Radar."""
 
-from sqlalchemy import Column, Integer, String, Boolean, Text
+from sqlalchemy import Column, Integer, String, Boolean, Text, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -10,6 +10,10 @@ class Trend(Base):
     """Model for storing radar trend analyses."""
 
     __tablename__ = "trends"
+    __table_args__ = (
+        UniqueConstraint("radar_date", "focus_area", "tool_name", name="uq_trend_date_area_tool"),
+        CheckConstraint("classification IN ('signal', 'noise')", name="ck_classification_valid"),
+    )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     radar_date = Column(String, nullable=False)
