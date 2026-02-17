@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- SQLite database schema with UNIQUE constraint on (radar_date, focus_area, tool_name) and CHECK constraint on classification (issue #4)
+- `seed_db()` function to populate database with 6 mock data items from PRD
+- Query functions: `get_trends_by_date()`, `get_trends_by_focus_area()`, `get_trends_by_classification()`, `get_latest_trends()`, `get_all_trends()`
+- Comprehensive test suite for models, constraints, seed data, and query functions (22 tests)
+- Added setuptools>=69.0.0 to requirements.txt (required for litellm pkg_resources dependency)
+
 ## [0.1.0] - 2026-02-16
 
 ### Scaffolding Complete ✅
