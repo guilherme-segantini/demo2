@@ -69,6 +69,13 @@ This schema is the **single source of truth** enabling parallel development acro
 
 **Tech:** SAP UI5 1.120+, JSON Model binding
 
+**Setup:**
+```bash
+npm install
+npm start    # localhost:8080
+npm run lint # 0 errors
+```
+
 ---
 
 ### Track B: Backend (Python/FastAPI)
@@ -81,6 +88,17 @@ This schema is the **single source of truth** enabling parallel development acro
 - SQLite database with `trends` table
 - Weekly scheduler (cron job) to refresh data once every 7 days
 - Sub-200ms response time from database read
+
+**Tech:** Python 3.11+, FastAPI, SQLite, uv (package manager)
+
+**Setup (using uv - NOT pip/venv):**
+```bash
+cd backend
+uv venv                              # Creates .venv
+source .venv/bin/activate            # Activate
+uv pip install -r requirements.txt   # Install deps
+uvicorn app.main:app --reload        # localhost:8000
+```
 
 **LiteLLM Integration with xAI/Grok:**
 ```python
