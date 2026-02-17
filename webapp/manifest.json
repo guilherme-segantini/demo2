@@ -1,6 +1,5 @@
 {
   "_version": "2.0.0",
-  "$schema": "https://raw.githubusercontent.com/nicm2/sap.ui.manifest/main/manifest-2.0.json",
   "sap.app": {
     "id": "tech.trends.radar",
     "type": "application",
@@ -61,8 +60,9 @@
     "routing": {
       "config": {
         "routerClass": "sap.m.routing.Router",
+        "type": "View",
         "viewType": "XML",
-        "viewPath": "tech.trends.radar.view",
+        "path": "tech.trends.radar.view",
         "controlId": "appContainer",
         "controlAggregation": "pages"
       },
@@ -75,9 +75,10 @@
       ],
       "targets": {
         "radar": {
-          "viewName": "RadarView",
-          "viewId": "radarView",
-          "viewLevel": 1
+          "type": "View",
+          "name": "RadarView",
+          "id": "radarView",
+          "level": 1
         }
       }
     },
