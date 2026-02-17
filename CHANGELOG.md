@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- External prompt loading from `prompts/` directory - enables prompt iteration without code changes (#5)
+- SAP Generative AI Hub support via LiteLLM with automatic provider detection
+- `load_prompt()` function to extract User Prompt section from markdown files
+- `is_sap_configured()` and `get_model_name()` helper functions for provider selection
+- Comprehensive tests for prompt loading and SAP configuration detection
+- SAP GenAI Hub models in `litellm_config.yaml` (gpt-4o, gpt-4, claude-3-5-sonnet)
+- SAP environment variable documentation in `.env.example`
+
+### Changed
+- `grok_service.py` now loads prompts from external files (falls back to inline template)
+- `call_grok_with_retry()` selects API provider based on environment configuration
+- `check_api_connection()` returns provider information in response
+
 ## [0.1.0] - 2026-02-16
 
 ### Scaffolding Complete ✅

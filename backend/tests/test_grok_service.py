@@ -2,6 +2,7 @@
 
 import pytest
 from unittest.mock import patch, MagicMock
+from pathlib import Path
 
 from app.services.grok_service import (
     analyze_focus_area,
@@ -9,7 +10,12 @@ from app.services.grok_service import (
     check_api_connection,
     validate_trend,
     call_grok_with_retry,
+    load_prompt,
+    is_sap_configured,
+    get_model_name,
     FOCUS_AREAS,
+    PROMPT_FILES,
+    PROMPTS_DIR,
 )
 
 
@@ -267,7 +273,7 @@ class TestCheckApiConnection:
         result = check_api_connection()
 
         assert result["status"] == "ok"
-        assert "litellm_base_url" in result
+        assert "provider" in result
 
     @patch("app.services.grok_service.litellm.completion")
     def test_connection_failure(self, mock_completion):
@@ -278,3 +284,150 @@ class TestCheckApiConnection:
 
         assert result["status"] == "error"
         assert "Connection refused" in result["message"]
+
+
+class TestLoadPrompt:
+    """Test external prompt loading functionality."""
+
+    def test_load_voice_ai_prompt(self):
+        """Test loading voice_ai_ux prompt from external file."""
+        prompt = load_prompt("voice_ai_ux")
+
+        assert prompt is not None
+        assert "Voice AI" in prompt
+        assert "SIGNAL" in prompt or "signal" in prompt.lower()
+        assert "NOISE" in prompt or "noise" in prompt.lower()
+
+    def test_load_agent_orchestration_prompt(self):
+        """Test loading agent_orchestration prompt from external file."""
+        prompt = load_prompt("agent_orchestration")
+
+        assert prompt is not None
+        assert "Agent" in prompt or "agent" in prompt
+        assert "orchestration" in prompt.lower()
+
+    def test_load_durable_runtime_prompt(self):
+        """Test loading durable_runtime prompt from external file."""
+        prompt = load_prompt("durable_runtime")
+
+        assert prompt is not None
+        assert "Durable" in prompt or "durable" in prompt
+        assert "runtime" in prompt.lower()
+
+    def test_load_unknown_focus_area_returns_none(self):
+        """Test that unknown focus area returns None."""
+        prompt = load_prompt("unknown_focus_area")
+
+        assert prompt is None
+
+    def test_prompt_files_exist(self):
+        """Verify all mapped prompt files exist."""
+        for focus_area, filename in PROMPT_FILES.items():
+            prompt_path = PROMPTS_DIR / filename
+            assert prompt_path.exists(), f"Missing prompt file: {prompt_path}"
+
+    def test_prompts_contain_json_schema(self):
+        """Verify prompts include JSON output schema."""
+        for focus_area in PROMPT_FILES.keys():
+            prompt = load_prompt(focus_area)
+            assert prompt is not None
+            assert "tool_name" in prompt
+            assert "classification" in prompt
+            assert "confidence_score" in prompt
+
+
+class TestSapConfiguration:
+    """Test SAP Generative AI Hub configuration detection."""
+
+    @patch.dict("os.environ", {}, clear=True)
+    @patch("app.services.grok_service.AICORE_SERVICE_KEY", None)
+    @patch("app.services.grok_service.AICORE_AUTH_URL", None)
+    @patch("app.services.grok_service.AICORE_CLIENT_ID", None)
+    @patch("app.services.grok_service.AICORE_CLIENT_SECRET", None)
+    @patch("app.services.grok_service.AICORE_BASE_URL", None)
+    def test_no_sap_config_returns_false(self):
+        """Test is_sap_configured returns False when no SAP credentials."""
+        assert is_sap_configured() is False
+
+    @patch("app.services.grok_service.AICORE_SERVICE_KEY", '{"key": "value"}')
+    def test_service_key_config_returns_true(self):
+        """Test is_sap_configured returns True with service key."""
+        assert is_sap_configured() is True
+
+    @patch("app.services.grok_service.AICORE_SERVICE_KEY", None)
+    @patch("app.services.grok_service.AICORE_AUTH_URL", "https://auth.example.com")
+    @patch("app.services.grok_service.AICORE_CLIENT_ID", "client-id")
+    @patch("app.services.grok_service.AICORE_CLIENT_SECRET", "secret")
+    @patch("app.services.grok_service.AICORE_BASE_URL", "https://api.example.com")
+    def test_individual_credentials_returns_true(self):
+        """Test is_sap_configured returns True with individual credentials."""
+        assert is_sap_configured() is True
+
+    @patch("app.services.grok_service.is_sap_configured")
+    def test_get_model_name_sap(self, mock_sap_configured):
+        """Test model name uses sap/ prefix when SAP is configured."""
+        mock_sap_configured.return_value = True
+        model = get_model_name()
+        assert model.startswith("sap/")
+
+    @patch("app.services.grok_service.is_sap_configured")
+    def test_get_model_name_local(self, mock_sap_configured):
+        """Test model name uses openai/ prefix when SAP is not configured."""
+        mock_sap_configured.return_value = False
+        model = get_model_name()
+        assert model.startswith("openai/")
+
+
+class TestAnalyzeFocusAreaWithExternalPrompts:
+    """Test analyze_focus_area uses external prompts."""
+
+    @patch("app.services.grok_service.load_prompt")
+    @patch("app.services.grok_service.litellm.completion")
+    def test_uses_external_prompt_when_available(self, mock_completion, mock_load_prompt):
+        """Test that external prompt is used when available."""
+        mock_load_prompt.return_value = "External prompt content"
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = """[
+            {
+                "tool_name": "TestTool",
+                "classification": "signal",
+                "confidence_score": 85,
+                "technical_insight": "Test insight",
+                "signal_evidence": ["evidence"],
+                "noise_indicators": [],
+                "architectural_verdict": true
+            }
+        ]"""
+        mock_completion.return_value = mock_response
+
+        result = analyze_focus_area("voice_ai_ux")
+
+        mock_load_prompt.assert_called_once_with("voice_ai_ux")
+        # Verify the prompt passed to completion contains external content
+        call_args = mock_completion.call_args
+        assert "External prompt content" in str(call_args)
+
+    @patch("app.services.grok_service.load_prompt")
+    @patch("app.services.grok_service.litellm.completion")
+    def test_falls_back_to_inline_when_external_missing(self, mock_completion, mock_load_prompt):
+        """Test fallback to inline template when external prompt not found."""
+        mock_load_prompt.return_value = None  # Simulate missing file
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = """[
+            {
+                "tool_name": "TestTool",
+                "classification": "signal",
+                "confidence_score": 85,
+                "technical_insight": "Test insight",
+                "signal_evidence": ["evidence"],
+                "noise_indicators": [],
+                "architectural_verdict": true
+            }
+        ]"""
+        mock_completion.return_value = mock_response
+
+        result = analyze_focus_area("voice_ai_ux")
+
+        # Should still succeed using inline template
+        assert result is not None
+        assert len(result) == 1
