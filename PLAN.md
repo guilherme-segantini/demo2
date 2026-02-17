@@ -6,62 +6,48 @@
 
 **Architecture:** `Grok (Discovery + Classification) → SQLite → FastAPI → SAP UI5 Dashboard`
 
-**Development Model:** 9 parallel Claude agents working on isolated git worktrees.
+**Development Model:** Parallel Claude agents working on isolated git worktrees.
 
 ---
 
-## Agent Structure (9 Agents)
+## Current Status
 
-| Agent | Worktree | Branch | Focus |
-|-------|----------|--------|-------|
-| Scaffolding | demo2-scaffold | feature/scaffolding | Project foundation (COMPLETE) |
-| Orchestrator | demo2 | main | PR merging, coordination |
-| Frontend Dev 1 | demo2-fe1 | feature/frontend-dev-1 | UI5 components |
-| Frontend Dev 2 | demo2-fe2 | feature/frontend-dev-2 | UI5 views/styling |
-| Backend Dev 1 | demo2-be1 | feature/backend-dev-1 | API endpoints |
-| Backend Dev 2 | demo2-be2 | feature/backend-dev-2 | Database/models |
-| Prompt Engineer | demo2-prompt | feature/prompt-engineer | AI prompts |
-| Problem Finder | demo2-qa | feature/problem-finder | Testing/QA |
-| DevOps | demo2-devops | feature/devops | CI/CD pipeline |
+### Open Issues
+
+| Issue | Agent | Title | Status |
+|-------|-------|-------|--------|
+| #18 | Frontend Dev 1 | UI5 App Shell & Base Structure | Ready |
+| #19 | Frontend Dev 2 | Voice AI Panel Component | Ready |
+| #20 | Backend Dev 1 | FastAPI App & GET /api/radar Endpoint | Ready |
+
+### Completed Issues
+
+| Issue | Title | Status |
+|-------|-------|--------|
+| #1 | [Track A] Set up SAPUI5 project structure | CLOSED |
+| #2 | [Track A] Implement RadarView with 3 focus area cards | CLOSED |
+| #3 | [Track A] Add mock data and JSON model binding | CLOSED |
+| #4 | [Track B] Set up FastAPI project structure | CLOSED |
+| #5 | [Track B] Implement /api/radar endpoints | CLOSED |
+| #6 | [Track B] Integrate LiteLLM with xAI/Grok | CLOSED |
+| #7 | [Track C] Create Voice AI prompt template | CLOSED |
+| #8 | [Track C] Create Agent Orchestration prompt template | CLOSED |
+| #9 | [Track C] Create Durable Runtime prompt template | CLOSED |
 
 ---
 
-## Execution Phases
+## Agent Structure
 
-### Phase 0: Scaffolding ✅ COMPLETE
-- Verify project structure
-- Ensure all files in place
-- Test frontend and backend start correctly
-- Merge to main
-
-### Phase 1: Parallel Development (8 Agents)
-All agents work simultaneously on their first issues:
-
-| Agent | Issue | Deliverable |
-|-------|-------|-------------|
-| Orchestrator | #13 | PR management workflow |
-| Frontend Dev 1 | #1 | UI5 Component.js, controllers |
-| Frontend Dev 2 | #2 | RadarView XML, 3-panel layout |
-| Backend Dev 1 | #3 | FastAPI endpoints |
-| Backend Dev 2 | #4 | SQLite models, database |
-| Prompt Engineer | #5 | Base prompt templates |
-| Problem Finder | #6 | QA review, test plan |
-| DevOps | #14 | GitHub Actions CI/CD |
-
-### Phase 2: Second Issues (After Dependencies)
-| Agent | Issue | Blocked By |
-|-------|-------|------------|
-| Frontend Dev 1 | #7 | #1 |
-| Frontend Dev 2 | #8 | #2 |
-| Backend Dev 1 | #9 | #3, #5 |
-| Backend Dev 2 | #10 | #4 |
-| Prompt Engineer | #11 | #5 |
-| Problem Finder | #12 | #6 |
-
-### Phase 3: Integration
-- Connect frontend to backend API
-- End-to-end testing
-- Performance optimization
+| Agent | Worktree | Branch | Focus | Current Issue |
+|-------|----------|--------|-------|---------------|
+| Orchestrator | demo2 | main | PR merging, coordination | - |
+| Frontend Dev 1 | demo2-fe1 | feature/frontend-dev-1 | UI5 components | #18 |
+| Frontend Dev 2 | demo2-fe2 | feature/frontend-dev-2 | UI5 views/styling | #19 |
+| Backend Dev 1 | demo2-be1 | feature/backend-dev-1 | API endpoints | #20 |
+| Backend Dev 2 | demo2-be2 | feature/backend-dev-2 | Database/models | - |
+| Prompt Engineer | demo2-prompt | feature/prompt-engineer | AI prompts | - |
+| Problem Finder | demo2-qa | feature/problem-finder | Testing/QA | - |
+| DevOps | demo2-devops | feature/devops | CI/CD pipeline | - |
 
 ---
 
@@ -116,6 +102,7 @@ demo2/
 | AI | LiteLLM + SAP GenAI Hub | Latest |
 | Testing | Playwright MCP | Latest |
 | CI/CD | GitHub Actions | - |
+| Python Env | uv | Latest |
 
 ---
 
@@ -197,8 +184,8 @@ npm run lint        # 0 errors
 ### Backend Verification
 ```bash
 cd backend
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
+uv venv && source .venv/bin/activate
+uv pip install -r requirements.txt
 pytest              # All tests pass
 uvicorn app.main:app --reload
 curl http://localhost:8000/api/radar
@@ -247,41 +234,41 @@ curl http://localhost:8000/api/radar
 ## Starting the Agents
 
 ```bash
-# Start all 8 agents in parallel (after scaffolding complete):
+# Orchestrator
+cd /Users/I769068/projects/scaling-productivity/demo2 && claude
 
-# Terminal 1 - Orchestrator
-cd /Users/I769068/projects/scaling-productivity/demo2 && claude --dangerously-skip-permissions
+# Frontend Dev 1
+cd /Users/I769068/projects/scaling-productivity/demo2-fe1 && claude
 
-# Terminal 2 - Frontend Dev 1
-cd /Users/I769068/projects/scaling-productivity/demo2-fe1 && claude --dangerously-skip-permissions
+# Frontend Dev 2
+cd /Users/I769068/projects/scaling-productivity/demo2-fe2 && claude
 
-# Terminal 3 - Frontend Dev 2
-cd /Users/I769068/projects/scaling-productivity/demo2-fe2 && claude --dangerously-skip-permissions
+# Backend Dev 1
+cd /Users/I769068/projects/scaling-productivity/demo2-be1 && claude
 
-# Terminal 4 - Backend Dev 1
-cd /Users/I769068/projects/scaling-productivity/demo2-be1 && claude --dangerously-skip-permissions
+# Backend Dev 2
+cd /Users/I769068/projects/scaling-productivity/demo2-be2 && claude
 
-# Terminal 5 - Backend Dev 2
-cd /Users/I769068/projects/scaling-productivity/demo2-be2 && claude --dangerously-skip-permissions
+# Prompt Engineer
+cd /Users/I769068/projects/scaling-productivity/demo2-prompt && claude
 
-# Terminal 6 - Prompt Engineer
-cd /Users/I769068/projects/scaling-productivity/demo2-prompt && claude --dangerously-skip-permissions
+# Problem Finder (QA)
+cd /Users/I769068/projects/scaling-productivity/demo2-qa && claude
 
-# Terminal 7 - Problem Finder (QA)
-cd /Users/I769068/projects/scaling-productivity/demo2-qa && claude --dangerously-skip-permissions
-
-# Terminal 8 - DevOps
-cd /Users/I769068/projects/scaling-productivity/demo2-devops && claude --dangerously-skip-permissions
+# DevOps
+cd /Users/I769068/projects/scaling-productivity/demo2-devops && claude
 ```
 
 ---
 
 ## Decisions Made
 
-- 9-agent parallel development with git worktrees
-- Scaffolding must complete before other work begins
+- Parallel agent development with git worktrees
 - One task at a time per agent
 - Squash merge for all PRs
 - Playwright MCP for UI testing
 - SAP Generative AI Hub via LiteLLM (not direct Grok)
 - Daily batch refresh (not 30-minute)
+- **uv for Python environment management** (not venv/pip)
+- **Mandatory testing before commits**
+- **PR required for every task**
